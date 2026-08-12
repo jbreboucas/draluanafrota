@@ -577,14 +577,7 @@ src="https://www.facebook.com/tr?id=28111047135225241&ev=PageView&noscript=1"
     step = 1;
     botSay("Oi! 👋 Que bom te ver por aqui.\nEu sou a assistente virtual da Dra. Luana Frota.", 700, function(){
       botSay("Vou te fazer 3 perguntinhas rápidas pra já te direcionar certinho com a equipe. Pode ser?", 900, function(){
-        addChips(["Vamos lá! 💛", "Prefiro falar direto"], function(choice){
-          if(choice === "Vamos lá! 💛"){ askName(); }
-          else{
-            botSay("Sem problemas! Já vou te levar direto para o WhatsApp da equipe. 😉", 700, function(){
-              setTimeout(function(){ finishToWhatsApp(true); }, 800);
-            });
-          }
-        });
+        addChips(["Vamos lá! 💛"], function(){ askName(); });
       });
     });
   }
@@ -638,15 +631,15 @@ src="https://www.facebook.com/tr?id=28111047135225241&ev=PageView&noscript=1"
       "• Idade: " + answers.idade + "\n" +
       "• Área de interesse: " + answers.area + "\n" +
       "• Urgência: " + answers.urgencia + "\n\n" +
-      "Vou te conectar agora com a equipe da Dra. Luana pra confirmar sua avaliação 💛",
+      "Agora é só tocar no botão abaixo para enviar essas informações e te conectar com a equipe da Dra. Luana 💛",
       1000,
       function(){
         var cta = document.createElement("div");
         cta.className = "chat-cta";
         var btn = document.createElement("button");
         btn.type = "button";
-        btn.textContent = "Enviar para o WhatsApp ➤";
-        btn.addEventListener("click", function(){ finishToWhatsApp(false); });
+        btn.textContent = "Enviar informações para o WhatsApp ➤";
+        btn.addEventListener("click", function(){ finishToWhatsApp(); });
         cta.appendChild(btn);
         body.appendChild(cta);
         scrollBottom();
@@ -654,24 +647,19 @@ src="https://www.facebook.com/tr?id=28111047135225241&ev=PageView&noscript=1"
     );
   }
 
-  function finishToWhatsApp(skipped){
+  function finishToWhatsApp(){
     chatCompleted = true;
-    var msg;
-    if(skipped){
-      msg = "Olá! Vim pelo chat do link da bio e gostaria de agendar uma avaliação com a Dra. Luana Frota." + sourceTag();
-    } else {
-      msg = "Olá! Vim pelo chat do link da bio.\n" +
-            "Nome: " + answers.nome + "\n" +
-            "Idade: " + answers.idade + "\n" +
-            "Área de interesse: " + answers.area + "\n" +
-            "Urgência: " + answers.urgencia +
-            sourceTag();
-      track("Lead", {
-        content_name: "Lead qualificado via chatbot",
-        area: answers.area,
-        urgencia: answers.urgencia
-      }, false);
-    }
+    var msg = "Olá! Vim pelo chat do link da bio.\n" +
+          "Nome: " + answers.nome + "\n" +
+          "Idade: " + answers.idade + "\n" +
+          "Área de interesse: " + answers.area + "\n" +
+          "Urgência: " + answers.urgencia +
+          sourceTag();
+    track("Lead", {
+      content_name: "Lead qualificado via chatbot",
+      area: answers.area,
+      urgencia: answers.urgencia
+    }, false);
     statusEl.textContent = "redirecionando para o WhatsApp…";
     window.open(waLink(msg), "_blank", "noopener");
   }
