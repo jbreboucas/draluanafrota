@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Demonstração — Chatbot Dra. Luana Frota</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23075E54'/%3E%3Ctext x='50' y='64' font-size='54' text-anchor='middle'%3E%E2%96%B6%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#faf6f1;
+    --text:#2b2420;
+    --text-dim:#8a7d70;
+    --whatsapp:#25D366;
+    --whatsapp-dark:#075E54;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;align-items:center;
+    min-height:100vh;
+  }
+
+  .demo-banner{
+    width:100%;max-width:460px;flex:0 0 auto;
+    background:#1f1b16;color:#f0d9b5;text-align:center;
+    font-size:.72rem;font-weight:600;letter-spacing:.3px;
+    padding:8px 14px;
+  }
+  .demo-banner b{color:#fff;}
+
+  .phone{
+    width:100%;max-width:460px;flex:1;
+    display:flex;flex-direction:column;
+    min-height:0;
+  }
+
+  .chat-header{
+    background:var(--whatsapp-dark);
+    display:flex;align-items:center;gap:10px;
+    padding:14px 14px;flex:0 0 auto;
+  }
+  .chat-header img{width:38px;height:38px;border-radius:50%;object-fit:cover;}
+  .chat-header .who{flex:1;}
+  .chat-header .who .name{font-size:.92rem;font-weight:700;color:#fff;}
+  .chat-header .who .status{font-size:.72rem;color:#cfe9df;}
+  .rec-dot{
+    width:8px;height:8px;border-radius:50%;background:#ff5b5b;
+    animation:blinkrec 1.1s infinite;
+  }
+  @keyframes blinkrec{0%,100%{opacity:1;}50%{opacity:.25;}}
+
+  .chat-body{
+    flex:1;overflow-y:auto;padding:16px 12px;
+    background:
+      linear-gradient(rgba(255,255,255,.25),rgba(255,255,255,.25)),
+      repeating-linear-gradient(45deg,#e9ddcf,#e9ddcf 12px,#efe6d8 12px,#efe6d8 24px);
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .bubble{
+    max-width:82%;padding:9px 12px;border-radius:10px;font-size:.86rem;
+    line-height:1.4;position:relative;white-space:pre-line;
+    box-shadow:0 1px 2px rgba(60,40,20,.12);
+    animation:pop .18s ease;
+  }
+  @keyframes pop{from{transform:scale(.92);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .bubble.bot{align-self:flex-start;background:#ffffff;color:#2b2420;border-top-left-radius:2px;}
+  .bubble.user{align-self:flex-end;background:#dcf8c6;color:#0b1a0f;border-top-right-radius:2px;}
+  .bubble .time{display:block;font-size:.62rem;opacity:.55;margin-top:4px;text-align:right;}
+
+  .typing{
+    align-self:flex-start;background:#ffffff;padding:10px 14px;border-radius:10px;
+    border-top-left-radius:2px;display:flex;gap:4px;
+    box-shadow:0 1px 2px rgba(60,40,20,.12);
+  }
+  .typing span{width:6px;height:6px;border-radius:50%;background:#9c9488;animation:blink 1.2s infinite;}
+  .typing span:nth-child(2){animation-delay:.2s;}
+  .typing span:nth-child(3){animation-delay:.4s;}
+  @keyframes blink{0%,80%,100%{opacity:.3;}40%{opacity:1;}}
+
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;align-self:flex-start;max-width:92%;margin-top:2px;}
+  .chip{
+    padding:8px 13px;border-radius:999px;border:1px solid var(--whatsapp);
+    color:var(--whatsapp);background:rgba(37,211,102,.08);font-size:.8rem;
+    font-weight:600;transition:transform .12s ease, background .12s ease;
+  }
+  .chip.tapped{background:rgba(37,211,102,.28);transform:scale(.94);}
+
+  .chat-input-row{
+    flex:0 0 auto;display:flex;gap:8px;padding:10px 12px 14px;
+    background:#f3ece3;border-top:1px solid rgba(60,40,20,.08);
+  }
+  .chat-input-row input{
+    flex:1;border:none;border-radius:999px;padding:11px 15px;
+    background:#ffffff;color:#2b2420;font-size:.9rem;outline:none;
+  }
+  .chat-input-row input::placeholder{color:#a89c8d;}
+  .chat-send{
+    width:42px;height:42px;border-radius:50%;border:none;background:var(--whatsapp);
+    color:#06341f;font-size:1.1rem;display:flex;align-items:center;justify-content:center;
+    flex:0 0 auto;transition:transform .12s ease;
+  }
+  .chat-send.tapped{transform:scale(.88);}
+
+  .chat-cta{align-self:flex-start;max-width:92%;margin-top:2px;display:flex;flex-direction:column;gap:8px;}
+  .chat-cta button{
+    padding:12px 16px;border-radius:999px;border:none;background:var(--whatsapp);
+    color:#06341f;font-weight:700;font-size:.88rem;transition:transform .12s ease;
+  }
+  .chat-cta button.tapped{transform:scale(.94);}
+
+  .success-note{
+    align-self:center;background:#fff8e6;border:1px solid #f0d9a0;color:#7a5a12;
+    font-size:.76rem;padding:10px 14px;border-radius:12px;text-align:center;
+    max-width:90%;margin-top:6px;
+  }
+
+  .demo-controls{
+    width:100%;max-width:460px;flex:0 0 auto;
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+    background:#1f1b16;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  .demo-controls .lbl{color:#cabfae;font-size:.7rem;}
+  .demo-controls button{
+    background:#f0d9b5;color:#1f1b16;border:none;border-radius:999px;
+    padding:9px 16px;font-size:.78rem;font-weight:700;cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<div class="demo-banner">🎬 <b>Modo demonstração</b> — simulação automática, nenhum dado é enviado de verdade</div>
+
+<div class="phone">
+  <div class="chat-header">
+    <img src="assets/img/profile.jpg" alt="">
+    <div class="who">
+      <div class="name">Dra. Luana Frota</div>
+      <div class="status" id="chatStatus">assistente virtual · online</div>
+    </div>
+    <span class="rec-dot" title="Demonstração em reprodução"></span>
+  </div>
+  <div class="chat-body" id="chatBody"></div>
+  <div class="chat-input-row" id="chatInputRow" style="display:none;">
+    <input type="text" id="chatInput" placeholder="Digite sua resposta…" readonly>
+    <button class="chat-send" id="chatSendBtn" type="button">➤</button>
+  </div>
+</div>
+
+<div class="demo-controls">
+  <span class="lbl" id="loopLabel">reproduzindo demonstração…</span>
+  <button id="restartBtn" type="button">🔁 Reiniciar agora</button>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // Respostas fictícias usadas só para a demonstração
+  var DEMO = {
+    nome: "Camila Duarte",
+    idade: "27",
+    area: "Lábios",
+    urgencia: "Quero agendar essa semana"
+  };
+
+  var body = document.getElementById("chatBody");
+  var inputRow = document.getElementById("chatInputRow");
+  var input = document.getElementById("chatInput");
+  var sendBtn = document.getElementById("chatSendBtn");
+  var statusEl = document.getElementById("chatStatus");
+  var loopLabel = document.getElementById("loopLabel");
+  var restartBtn = document.getElementById("restartBtn");
+
+  var timers = [];
+  function schedule(fn, delay){ var id = setTimeout(fn, delay); timers.push(id); return id; }
+  function clearAllTimers(){ timers.forEach(clearTimeout); timers = []; }
+
+  function now(){
+    var d = new Date();
+    return d.getHours().toString().padStart(2,"0") + ":" + d.getMinutes().toString().padStart(2,"0");
+  }
+  function scrollBottom(){ body.scrollTop = body.scrollHeight; }
+
+  function addBubble(text, who){
+    var b = document.createElement("div");
+    b.className = "bubble " + who;
+    b.textContent = text;
+    var t = document.createElement("span");
+    t.className = "time";
+    t.textContent = now();
+    b.appendChild(t);
+    body.appendChild(b);
+    scrollBottom();
+    return b;
+  }
+
+  function botSay(text, delay, cb){
+    var typing = document.createElement("div");
+    typing.className = "typing";
+    typing.innerHTML = "<span></span><span></span><span></span>";
+    body.appendChild(typing);
+    scrollBottom();
+    schedule(function(){
+      typing.remove();
+      addBubble(text, "bot");
+      if(cb) schedule(cb, 500);
+    }, delay || 900);
+  }
+
+  // Mostra as opções, mas "toca" sozinho na escolha certa depois de um tempo
+  function autoChips(options, pick, cb){
+    var row = document.createElement("div");
+    row.className = "chip-row";
+    var chipEls = options.map(function(opt){
+      var c = document.createElement("button");
+      c.type = "button";
+      c.className = "chip";
+      c.textContent = opt;
+      row.appendChild(c);
+      return c;
+    });
+    body.appendChild(row);
+    scrollBottom();
+
+    schedule(function(){
+      var target = chipEls[options.indexOf(pick)];
+      target.classList.add("tapped");
+      schedule(function(){
+        row.remove();
+        addBubble(pick, "user");
+        if(cb) schedule(cb, 500);
+      }, 260);
+    }, 1100);
+  }
+
+  // Mostra o campo de texto e "digita" a resposta sozinho
+  function autoType(placeholder, text, cb){
+    inputRow.style.display = "flex";
+    input.placeholder = placeholder;
+    input.value = "";
+    var i = 0;
+    schedule(function typeChar(){
+      if(i <= text.length){
+        input.value = text.slice(0, i);
+        i++;
+        schedule(typeChar, 55 + Math.random()*45);
+      } else {
+        schedule(function(){
+          sendBtn.classList.add("tapped");
+          schedule(function(){
+            sendBtn.classList.remove("tapped");
+            inputRow.style.display = "none";
+            addBubble(text, "user");
+            if(cb) schedule(cb, 500);
+          }, 180);
+        }, 400);
+      }
+    }, 700);
+  }
+
+  function runDemo(){
+    body.innerHTML = "";
+    inputRow.style.display = "none";
+    statusEl.textContent = "assistente virtual · online";
+    loopLabel.textContent = "reproduzindo demonstração…";
+
+    botSay("Oi! 👋 Que bom te ver por aqui.\nEu sou a assistente virtual da Dra. Luana Frota.", 700, function(){
+      botSay("Vou te fazer 3 perguntinhas rápidas pra já te direcionar certinho com a equipe. Pode ser?", 900, function(){
+        autoChips(["Vamos lá! 💛"], "Vamos lá! 💛", function(){
+          botSay("Pra começar, qual é o seu nome?", 800, function(){
+            autoType("Digite seu nome…", DEMO.nome, function(){
+              botSay("Prazer, " + DEMO.nome + "! E qual sua idade?", 800, function(){
+                autoType("Digite sua idade…", DEMO.idade, function(){
+                  botSay("Qual área você gostaria de melhorar?", 800, function(){
+                    autoChips(
+                      ["Lábios", "Contorno facial", "Olheiras / olhar", "Nariz", "Corpo", "Ainda não sei"],
+                      DEMO.area,
+                      function(){
+                        botSay("E qual a urgência pra realizar o procedimento?", 800, function(){
+                          autoChips(
+                            ["Quero agendar essa semana", "Nas próximas 2–3 semanas", "Só pesquisando por enquanto"],
+                            DEMO.urgencia,
+                            function(){
+                              botSay(
+                                "Show, " + DEMO.nome + "! Anotei aqui:\n" +
+                                "• Idade: " + DEMO.idade + "\n" +
+                                "• Área de interesse: " + DEMO.area + "\n" +
+                                "• Urgência: " + DEMO.urgencia + "\n\n" +
+                                "Agora é só tocar no botão abaixo para enviar essas informações e te conectar com a equipe da Dra. Luana 💛",
+                                1000,
+                                function(){
+                                  var cta = document.createElement("div");
+                                  cta.className = "chat-cta";
+                                  var btn = document.createElement("button");
+                                  btn.type = "button";
+                                  btn.textContent = "Enviar informações para o WhatsApp ➤";
+                                  cta.appendChild(btn);
+                                  body.appendChild(cta);
+                                  scrollBottom();
+
+                                  schedule(function(){
+                                    btn.classList.add("tapped");
+                                    statusEl.textContent = "enviando para a equipe…";
+                                    schedule(function(){
+                                      var note = document.createElement("div");
+                                      note.className = "success-note";
+                                      note.textContent = "✅ Neste ponto, o link real abre o WhatsApp da equipe com essas respostas já preenchidas na mensagem.";
+                                      body.appendChild(note);
+                                      scrollBottom();
+                                      statusEl.textContent = "assistente virtual · online";
+                                      loopLabel.textContent = "reiniciando em instantes…";
+                                      schedule(runDemo, 5000);
+                                    }, 900);
+                                  }, 1300);
+                                }
+                              );
+                            }
+                          );
+                        });
+                      }
+                    );
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+
+  restartBtn.addEventListener("click", function(){
+    clearAllTimers();
+    runDemo();
+  });
+
+  runDemo();
+})();
+</script>
+</body>
+</html>
